@@ -11,6 +11,7 @@ import type { CategoryTree } from "../utils";
 import { ref } from "vue";
 import { formatDatetime } from "@/utils/date";
 import { usePermission } from "@/utils/permission";
+import { defTypeNames } from "../../../../../utils/defines";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -68,6 +69,7 @@ function onDelete(category: CategoryTree) {
             </div>
           </template>
           <template #start>
+            {{ defTypeNames(category.metadata.type) }}
             <VEntityField :title="category.spec.displayName">
               <template #description>
                 <a

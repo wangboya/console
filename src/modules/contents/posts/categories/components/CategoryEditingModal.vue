@@ -16,6 +16,7 @@ import { reset } from "@formkit/core";
 import { setFocus } from "@/formkit/utils/focus";
 import { useThemeCustomTemplates } from "@/modules/interface/themes/composables/use-theme";
 import AnnotationsForm from "@/components/form/AnnotationsForm.vue";
+import { DefTypes } from "../../../../../utils/defines";
 
 const props = withDefaults(
   defineProps<{
@@ -49,6 +50,7 @@ const initialFormState: Category = {
   metadata: {
     name: "",
     generateName: "category-",
+    type: "",
   },
 };
 
@@ -176,6 +178,14 @@ const { templates } = useThemeCustomTemplates("category");
               label="别名"
               type="text"
               validation="required|length:0,50"
+            ></FormKit>
+            <FormKit
+              v-model="formState.metadata.type"
+              help="类型区分"
+              name="type"
+              label="类型"
+              type="select"
+              :options="DefTypes"
             ></FormKit>
             <FormKit
               v-model="formState.spec.template"

@@ -45,7 +45,8 @@ import FilterTag from "@/components/filter/FilterTag.vue";
 import FilteCleanButton from "@/components/filter/FilterCleanButton.vue";
 import { getNode } from "@formkit/core";
 import TagDropdownSelector from "@/components/dropdown-selector/TagDropdownSelector.vue";
-
+import { defTypeNames, DefTypes } from "../../../utils/defines";
+import type { DropdownItem } from "../../../utils/defines";
 const { currentUserHasPermission } = usePermission();
 
 const posts = ref<ListedPostList>({
@@ -82,6 +83,10 @@ const handleFetchPosts = async (options?: {
     let contributors: string[] | undefined;
     const labelSelector: string[] = ["content.halo.run/deleted=false"];
 
+    let fieldSelector: string[] | undefined;
+    if (selectedTypeItem.value.value) {
+      fieldSelector = ["type=" + selectedTypeItem.value.value];
+    }
     if (selectedCategory.value) {
       categories = [
         selectedCategory.value.metadata.name,
@@ -118,6 +123,7 @@ const handleFetchPosts = async (options?: {
       category: categories,
       tag: tags,
       contributor: contributors,
+      fieldSelector: fieldSelector,
     });
     posts.value = data;
 
@@ -320,6 +326,17 @@ interface SortItem {
   sortOrder: boolean;
 }
 
+const TypeItems: DropdownItem[] = [
+  {
+    label: "全部",
+    value: undefined,
+  },
+];
+
+DefTypes.forEach((e) => {
+  TypeItems.push(e);
+});
+
 const VisibleItems: VisibleItem[] = [
   {
     label: "全部",
@@ -377,7 +394,7 @@ const SortItems: SortItem[] = [
     sortOrder: true,
   },
 ];
-
+const selectedTypeItem = ref<DropdownItem>(TypeItems[0]);
 const selectedVisibleItem = ref<VisibleItem>(VisibleItems[0]);
 const selectedPublishStatusItem = ref<PublishStatuItem>(PublishStatuItems[0]);
 const selectedSortItem = ref<SortItem>();
@@ -385,6 +402,11 @@ const selectedCategory = ref<Category>();
 const selectedTag = ref<Tag>();
 const selectedContributor = ref<User>();
 const keyword = ref("");
+
+function handleTypeChange(typeItem: DropdownItem) {
+  selectedTypeItem.value = typeItem;
+  handleFetchPosts({ page: 1 });
+}
 
 function handleVisibleItemChange(visibleItem: VisibleItem) {
   selectedVisibleItem.value = visibleItem;
@@ -430,6 +452,7 @@ function handleClearKeyword() {
 }
 
 function handleClearFilters() {
+  selectedTypeItem.value = TypeItems[0];
   selectedVisibleItem.value = VisibleItems[0];
   selectedPublishStatusItem.value = PublishStatuItems[0];
   selectedSortItem.value = undefined;
@@ -527,6 +550,12 @@ const hasFilters = computed(() => {
                 <FilterTag v-if="keyword" @close="handleClearKeyword()">
                   关键词：{{ keyword }}
                 </FilterTag>
+                <FilterTag
+                  v-if="selectedTypeItem.value !== undefined"
+                  @close="handleTypeChange(TypeItems[0])"
+                >
+                  类型：{{ selectedTypeItem.label }}
+                </FilterTag>
 
                 <FilterTag
                   v-if="selectedPublishStatusItem.value !== undefined"
@@ -580,6 +609,35 @@ const hasFilters = computed(() => {
             </div>
             <div class="mt-4 flex sm:mt-0">
               <VSpace spacing="lg">
+                <FloatingDropdown>
+                  <div
+                    class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
+                  >
+                    <span class="mr-0.5">类型</span>
+                    <span>
+                      <IconArrowDown />
+                    </span>
+                  </div>
+                  <template #popper>
+                    <div class="w-72 p-4">
+                      <ul class="space-y-1">
+                        <li
+                          v-for="(defType, index) in TypeItems"
+                          :key="index"
+                          v-close-popper
+                          :class="{
+                            'bg-gray-100':
+                              selectedTypeItem.value === defType.value,
+                          }"
+                          class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          @click="handleTypeChange(defType)"
+                        >
+                          <span class="truncate">{{ defType.label }}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </template>
+                </FloatingDropdown>
                 <FloatingDropdown>
                   <div
                     class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
@@ -762,6 +820,7 @@ const hasFilters = computed(() => {
                 />
               </template>
               <template #start>
+                {{ defTypeNames(post.post.metadata.type) }}
                 <VEntityField
                   :title="post.post.spec.title"
                   :route="{

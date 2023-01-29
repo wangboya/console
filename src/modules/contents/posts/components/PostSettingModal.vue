@@ -10,6 +10,7 @@ import { randomUUID } from "@/utils/id";
 import { toDatetimeLocal, toISOString } from "@/utils/date";
 import AnnotationsForm from "@/components/form/AnnotationsForm.vue";
 import { submitForm } from "@formkit/core";
+import { DefTypes } from "../../../../utils/defines";
 
 const initialFormState: Post = {
   spec: {
@@ -36,6 +37,7 @@ const initialFormState: Post = {
   kind: "Post",
   metadata: {
     name: randomUUID(),
+    type: "",
   },
 };
 
@@ -265,6 +267,14 @@ const annotationsFormRef = ref<InstanceType<typeof AnnotationsForm>>();
               name="slug"
               type="text"
               validation="required|length:0,100"
+            ></FormKit>
+            <FormKit
+              v-model="formState.metadata.type"
+              help="类型区分"
+              name="type"
+              label="类型"
+              type="select"
+              :options="DefTypes"
             ></FormKit>
             <FormKit
               v-model="formState.spec.categories"
