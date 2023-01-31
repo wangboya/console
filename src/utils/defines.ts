@@ -6,8 +6,8 @@ interface DropdownItem {
 const DefTypes: DropdownItem[] = [
   { label: "新闻", value: "news" },
   { label: "快讯", value: "flash" },
-  { label: "文章", value: "article" },
-  { label: "话题", value: "topic" },
+  { label: "深度", value: "article" },
+  { label: "专题", value: "topic" },
 ];
 
 function defTypeNames(value: string | undefined) {
